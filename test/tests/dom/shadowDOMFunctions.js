@@ -1,5 +1,4 @@
 /* @flow */
-
 import { isShadowElement, getShadowRoot, getShadowHost, insertShadowSlot } from '../../../src';
 
 // This component is needed for testing the case when shadowRoot and shadowDOM are the same
@@ -136,8 +135,25 @@ describe('Web components', () => {
     
         });
     
-        it('should throw exception if Host element is also in shadow dom', () => {
+        it('should return slotProvider ', () => {
+            const innerElement = document.querySelector('custom-web-component')?.shadowRoot?.querySelector('#inner-span');
+            
+            if (!innerElement) {
+                throw new Error('unable to find inner element');
+            }
     
+            const result = insertShadowSlot(innerElement);
+    
+            if (!result) {
+                throw new Error('should have returned an element, got undefined');
+            }
+    
+            if (!result?.getAttribute('slot')?.match(/shadow-slot-/i)) {
+                throw new Error('should have returned a valid slot element');
+            }
+        });
+
+        it('should return a nested slotProvider ', () => {
             // TestCase components setup
             const customWrapper = document.createElement('custom-wrapper');
             customWrapper.setAttribute('id', 'custom-wrapper-id');
@@ -152,7 +168,6 @@ describe('Web components', () => {
             customComponent.shadowRoot.appendChild(innerSpan);
             // $FlowFixMe
             customWrapper.shadowRoot.appendChild(customComponent);
-            
             // $FlowFixMe
             document.body.appendChild(customWrapper);
 
@@ -169,35 +184,14 @@ describe('Web components', () => {
              *    </custom-wrapper>
              * </html>
              */
-             
-            let insertShadowSlotError = '';
 
-            try {
-                insertShadowSlot(innerSpan);
-            } catch (error) {
-                insertShadowSlotError = error?.message;
-            }
+            const slotProvider =  insertShadowSlot(innerSpan);
 
-            if (!insertShadowSlotError.match(/Host element is also in shadow dom/)) {
-                throw new Error(`should have thrown 'Host element is also in shadow dom' exception, got '${ insertShadowSlotError }'`);
-            }
-        });
-    
-    
-        it('should return slotProvider ', () => {
-            const innerElement = document.querySelector('custom-web-component')?.shadowRoot?.querySelector('#inner-span');
-            
-            if (!innerElement) {
-                throw new Error('unable to find inner element');
-            }
-    
-            const result = insertShadowSlot(innerElement);
-    
-            if (!result) {
+            if (!slotProvider) {
                 throw new Error('should have returned an element, got undefined');
             }
     
-            if (!result?.getAttribute('slot')?.match(/shadow-slot-/i)) {
+            if (!slotProvider?.getAttribute('slot')?.match(/shadow-slot-/i)) {
                 throw new Error('should have returned a valid slot element');
             }
         });

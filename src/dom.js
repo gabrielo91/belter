@@ -1,6 +1,8 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-console */
 /* @flow */
 /* eslint max-lines: off */
-
+import { v4 as uuidv4 } from 'uuid';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { linkFrameWindow, isWindowClosed, assertSameDomain,
     type SameDomainWindowType, type CrossDomainWindowType } from 'cross-domain-utils/src';
@@ -1101,26 +1103,51 @@ export function getShadowHost(element : Node) : ?HTMLElement {
     }
 }
 
-export function insertShadowSlot(element : HTMLElement) : HTMLElement {
+  
+export function getRootNode(element : Node) : Node {
+    while (element.parentNode) {
+        element = element.parentNode;
+    }
+  
+    return element;
+}
+
+export function insertShadowSlot(element : HTMLElement, styles? : HTMLElement) : HTMLElement {
+    // const DEFAULT_STYLESHEET_INDEX = 0;
+    // $FlowFixMe
+    let styleNode = getRootNode(element).querySelector('style');
     const shadowHost = getShadowHost(element);
 
     if (!shadowHost) {
         throw new Error(`Element is not in shadow dom`);
     }
 
-    if (isShadowElement(shadowHost)) {
-        throw new Error(`Host element is also in shadow dom`);
-    }
-
-    const slotName = `shadow-slot-${ uniqueID() }`;
-
+    const slotName = `shadow-slot-${  uuidv4() }`;
     const slot = document.createElement('slot');
     slot.setAttribute('name', slotName);
     element.appendChild(slot);
-    
+
     const slotProvider = document.createElement('div');
     slotProvider.setAttribute('slot', slotName);
     shadowHost.appendChild(slotProvider);
+
+    if (styles) {
+        console.log('styles are');
+        console.log(styles);
+        if (!styleNode) {
+            styleNode = document.createElement('style');
+            element.appendChild(styleNode);
+        }
+    
+        // styleNode.sheet?.insertRule(
+        //     `::slotted([slot="${  slotName  }"]) { ${  styles  } }`, DEFAULT_STYLESHEET_INDEX
+        // );
+    }
+
+
+    if (isShadowElement(shadowHost)) {
+        return insertShadowSlot(slotProvider, styles);
+    }
 
     return slotProvider;
 }
