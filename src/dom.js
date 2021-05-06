@@ -1,5 +1,3 @@
-/* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable no-console */
 /* @flow */
 /* eslint max-lines: off */
 import { v4 as uuidv4 } from 'uuid';
@@ -1113,14 +1111,15 @@ export function getRootNode(element : Node) : Node {
 }
 
 export function insertShadowSlot(element : HTMLElement, styles? : HTMLElement) : HTMLElement {
-    // const DEFAULT_STYLESHEET_INDEX = 0;
-    // $FlowFixMe
-    let styleNode = getRootNode(element).querySelector('style');
+    const DEFAULT_STYLESHEET_INDEX = 0;
     const shadowHost = getShadowHost(element);
 
     if (!shadowHost) {
         throw new Error(`Element is not in shadow dom`);
     }
+
+    // $FlowFixMe
+    let styleNode = getRootNode(element).querySelector('style');
 
     const slotName = `shadow-slot-${  uuidv4() }`;
     const slot = document.createElement('slot');
@@ -1132,18 +1131,18 @@ export function insertShadowSlot(element : HTMLElement, styles? : HTMLElement) :
     shadowHost.appendChild(slotProvider);
 
     if (styles) {
-        console.log('styles are');
-        console.log(styles);
         if (!styleNode) {
             styleNode = document.createElement('style');
             element.appendChild(styleNode);
         }
     
-        // styleNode.sheet?.insertRule(
-        //     `::slotted([slot="${  slotName  }"]) { ${  styles  } }`, DEFAULT_STYLESHEET_INDEX
-        // );
+        // $FlowFixMe
+        const cssRule = `::slotted([slot="${  slotName  }"]) { ${  styles  } }`;
+        
+        if (styleNode.sheet) {
+            styleNode.sheet.insertRule(cssRule, DEFAULT_STYLESHEET_INDEX);
+        }
     }
-
 
     if (isShadowElement(shadowHost)) {
         return insertShadowSlot(slotProvider, styles);
