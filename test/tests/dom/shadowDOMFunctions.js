@@ -35,13 +35,15 @@ describe('Web components', () => {
         if (!document?.body) {
             throw new Error('Body not found');
         }
+        
+        const customElement = document.createElement('custom-web-component');
 
         // Clean the DOM
-        document.body.innerHTML = '';
+        if (document.body) {
+            document.body.innerHTML = '';
+            document.body.appendChild(customElement);
+        }
 
-        const customElement = document.createElement('custom-web-component');
-        // $FlowFixMe
-        document.body.appendChild(customElement);
     
         if (!customElement || !customElement.shadowRoot) {
             throw new Error('custom element does not have shadow root');
@@ -164,12 +166,20 @@ describe('Web components', () => {
             const innerSpan = document.createElement('span');
             innerSpan.setAttribute('id', 'inner-span');
             
-            // $FlowFixMe
-            customComponent.shadowRoot.appendChild(innerSpan);
-            // $FlowFixMe
-            customWrapper.shadowRoot.appendChild(customComponent);
-            // $FlowFixMe
-            document.body.appendChild(customWrapper);
+            const customComponentShadowRoot = customComponent.shadowRoot;
+            const customWrapperShadowRoot = customWrapper.shadowRoot;
+            
+            if (customComponentShadowRoot) {
+                customComponentShadowRoot.appendChild(innerSpan);
+            }
+
+            if (customWrapperShadowRoot) {
+                customWrapperShadowRoot.appendChild(customComponent);
+            }
+
+            if (document.body) {
+                document.body.appendChild(customWrapper);
+            }
 
             /**
              * At this point the HTML structure looks like this:
