@@ -1,6 +1,5 @@
 /* @flow */
 /* eslint max-lines: off */
-import { v4 as uuidv4 } from 'uuid';
 import { ZalgoPromise } from 'zalgo-promise/src';
 import { linkFrameWindow, isWindowClosed, assertSameDomain,
     type SameDomainWindowType, type CrossDomainWindowType } from 'cross-domain-utils/src';
@@ -1121,7 +1120,7 @@ export function insertShadowSlot(element : HTMLElement, styles? : HTMLElement) :
     // $FlowFixMe
     let styleNode = getRootNode(element).querySelector('style');
 
-    const slotName = `shadow-slot-${  uuidv4() }`;
+    const slotName = `shadow-slot-${ uniqueID() }`;
     const slot = document.createElement('slot');
     slot.setAttribute('name', slotName);
     element.appendChild(slot);
@@ -1136,8 +1135,7 @@ export function insertShadowSlot(element : HTMLElement, styles? : HTMLElement) :
             element.appendChild(styleNode);
         }
     
-        // $FlowFixMe
-        const cssRule = `::slotted([slot="${  slotName  }"]) { ${  styles  } }`;
+        const cssRule = `::slotted([slot="${  slotName  }"]) { ${  styles.toString()  } }`;
         
         if (styleNode.sheet) {
             styleNode.sheet.insertRule(cssRule, DEFAULT_STYLESHEET_INDEX);
